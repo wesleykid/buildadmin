@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, rmSync, writeFile, writeFileSync } from 'fs'
+import { chmodSync, existsSync, readdirSync, rmSync, writeFile, writeFileSync } from 'fs'
 import { trimEnd } from 'lodash-es'
 import { spawn } from 'node:child_process'
 import { pathToFileURL } from 'node:url'
@@ -173,13 +173,21 @@ async function buildI18nAllyLocaleIndex() {
     // 清理旧的生成文件，避免语言被删除后残留
     for (const file of readdirSync(LANG_DIR)) {
         if (file.endsWith('.json')) {
-            rmSync(join(LANG_DIR, file))
+            const filePath = join(LANG_DIR, file)
+            // 旧文件可能是只读的，先解除只读再删除，确保可重复生成
+            try {
+                chmodSync(filePath, 0o666)
+            } catch {}
+            rmSync(filePath, { force: true })
         }
     }
 
     for (const locale of locales) {
         const messages = await loadLocale(locale)
-        writeFileSync(join(LANG_DIR, `${locale}.json`), JSON.stringify(messages, null, 4) + '\n', 'utf-8')
+        const filePath = join(LANG_DIR, `${locale}.json`)
+        writeFileSync(filePath, JSON.stringify(messages, null, 4) + '\n', 'utf-8')
+        // 设为只读，防止误编辑
+        chmodSync(filePath, 0o444)
     }
 
     console.log(`${gray(formatTime())} ${cyan('[i18n-ally]')} updated: ${locales.map((locale) => `src/lang/${locale}.json`).join(', ')}`)
