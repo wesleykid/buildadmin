@@ -2,6 +2,7 @@ import { isEmpty, uniq } from 'lodash-es'
 import type { App } from 'vue'
 import type { Composer, I18n } from 'vue-i18n'
 import { createI18n } from 'vue-i18n'
+import { handleMsglist } from './merge'
 import { useConfig } from '/@/stores/config'
 
 /*
@@ -139,34 +140,6 @@ export async function loadAndMergeMessages(rawPaths: string[], prefix: string, l
     )
 }
 
-export function handleMsglist(msg: anyObj, mList: anyObj, pathName: string) {
-    const pathNameTmp = pathName.split('/')
-    let obj: anyObj = {}
-    for (let i = pathNameTmp.length - 1; i >= 0; i--) {
-        if (i == pathNameTmp.length - 1) {
-            obj = {
-                [pathNameTmp[i]]: mList,
-            }
-        } else {
-            obj = {
-                [pathNameTmp[i]]: obj,
-            }
-        }
-    }
-    return mergeMsg(msg, obj)
-}
-
-export function mergeMsg(msg: anyObj, obj: anyObj) {
-    for (const key in obj) {
-        if (typeof msg[key] == 'undefined') {
-            msg[key] = obj[key]
-        } else if (typeof msg[key] == 'object') {
-            msg[key] = mergeMsg(msg[key], obj[key])
-        }
-    }
-    return msg
-}
-
 export function editDefaultLang(lang: string): void {
     const config = useConfig()
     config.setLang(lang)
@@ -176,3 +149,5 @@ export function editDefaultLang(lang: string): void {
      */
     location.reload()
 }
+
+export { handleMsglist, mergeMsg } from './merge'
