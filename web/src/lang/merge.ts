@@ -1,6 +1,6 @@
 /**
  * 语言包合并工具函数
- * 单独存放以便 /@/utils/build.ts 能直接 import
+ * 单独存放以便 /@/utils/dev.ts 能直接 import
  */
 
 export function mergeMsg(msg: anyObj, obj: anyObj): anyObj {

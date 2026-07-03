@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, rmSync, writeFile, writeFileSync } from 'fs'
 import { trimEnd } from 'lodash-es'
+import { spawn } from 'node:child_process'
 import { pathToFileURL } from 'node:url'
 import { join } from 'path'
 import { handleMsglist, mergeMsg } from '../lang/merge'
@@ -17,7 +18,7 @@ function cyan(text: string): string {
     return `\x1b[36m${text}\x1b[0m`
 }
 
-/* ========================== 生成 tableRenderer.d.ts =============================== */
+// ========================== 生成 tableRenderer.d.ts ===============================
 
 function getFileNames(dir: string) {
     const dirents = readdirSync(dir, {
@@ -51,10 +52,10 @@ const buildTableRendererType = () => {
         if (err) throw err
     })
 
-    console.log(`${gray(formatTime())} ${cyan('[table]')} updated: types/tableRenderer.d.ts}`)
+    console.log(`${gray(formatTime())} ${cyan('[table]')} updated: types/tableRenderer.d.ts`)
 }
 
-/* ========================== 为开发环境生成 i18n Ally locale index =============================== */
+// ========================== 为开发环境生成 i18n Ally locale index ===============================
 
 const LANG_DIR = './src/lang'
 
@@ -184,7 +185,24 @@ async function buildI18nAllyLocaleIndex() {
     console.log(`${gray(formatTime())} ${cyan('[i18n-ally]')} updated: ${locales.map((locale) => `src/lang/${locale}.json`).join(', ')}`)
 }
 
-/* ========================== run =============================== */
+// ========================== 启动 Vite 开发服务器 ===============================
 
-buildTableRendererType()
-buildI18nAllyLocaleIndex()
+async function start() {
+    // 1. 生成 tableRenderer.d.ts
+    buildTableRendererType()
+
+    // 2. 生成 i18n Ally 开发环境语言包索引
+    await buildI18nAllyLocaleIndex()
+
+    // 3. 启动 Vite 开发服务器
+    const vite = spawn('vite', ['--force'], {
+        stdio: 'inherit',
+        shell: true,
+    })
+
+    vite.on('exit', (code) => {
+        process.exit(code ?? 0)
+    })
+}
+
+start()
