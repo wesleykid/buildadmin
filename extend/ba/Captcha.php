@@ -39,6 +39,19 @@ use think\facade\Db;
  */
 class Captcha
 {
+    /**
+     * 逻辑验证码
+     */
+    public const LOGIC_CAPTCHA = 32;
+
+    /**
+     * 图形验证码
+     */
+    public const GRAPHIC_CAPTCHA = 30;
+
+    /**
+     * 配置
+     */
     protected array $config = [
         // 验证码加密密钥
         'seKey'    => 'BuildAdmin',
@@ -134,18 +147,19 @@ class Captcha
 
     /**
      * 验证验证码是否正确
-     * @param string $code 用户验证码
-     * @param string $id   验证码标识
+     * @param string $code    用户验证码
+     * @param string $id      验证码标识
+     * @param int    $typeLen 验证码类型和长度，内置有常量:LOGIC_CAPTCHA=逻辑验证码,GRAPHIC_CAPTCHA=图形验证码
      * @return bool 用户验证码是否正确
      * @throws Throwable
      */
-    public function check(string $code, string $id): bool
+    public function check(string $code, string $id, int $typeLen = self::LOGIC_CAPTCHA): bool
     {
         $key    = $this->authCode($this->seKey, $id);
         $seCode = Db::name('captcha')->where('key', $key)->find();
 
         // 验证码为空
-        if (empty($code) || empty($seCode)) {
+        if (empty($code) || empty($seCode) || strlen($seCode['code']) != $typeLen) {
             return false;
         }
 
@@ -155,7 +169,7 @@ class Captcha
             return false;
         }
 
-        if ($this->authCode(strtoupper($code), $id) == $seCode['code']) {
+        if ($this->authCode(strtoupper($code), $id, $typeLen) == $seCode['code']) {
             $this->reset && Db::name('captcha')->where('key', $key)->delete();
             return true;
         }
@@ -180,7 +194,7 @@ class Captcha
             Db::name('captcha')->where('key', $key)->delete();
         }
         $captcha = $this->generate($captcha);
-        $code    = $this->authCode($captcha, $id);
+        $code    = $this->authCode($captcha, $id, self::LOGIC_CAPTCHA);
         Db::name('captcha')
             ->insert([
                 'key'         => $key,
@@ -258,13 +272,13 @@ class Captcha
         $captcha = Db::name('captcha')->where('key', $key)->find();
 
         // 绘验证码
-        if ($captcha && $nowTime <= $captcha['expire_time']) {
+        if ($captcha && strlen($captcha['code']) == self::GRAPHIC_CAPTCHA && $nowTime <= $captcha['expire_time']) {
             $this->writeText($captcha['captcha']);
         } else {
             $captcha = $this->writeText();
 
             // 保存验证码
-            $code = $this->authCode(strtoupper(implode('', $captcha)), $id);
+            $code = $this->authCode(strtoupper(implode('', $captcha)), $id, self::GRAPHIC_CAPTCHA);
             Db::name('captcha')->insert([
                 'key'         => $key,
                 'code'        => $code,
@@ -406,15 +420,16 @@ class Captcha
 
 
     /**
-     * 加密验证码
-     * @param string $str 验证码字符串
+     * 加密
+     * @param string $str 任意字符串
      * @param string $id  验证码标识
+     * @param int    $len 需要的密文长度
      */
-    private function authCode(string $str, string $id): string
+    private function authCode(string $str, string $id, int $len = 32): string
     {
         $key = substr(md5($this->seKey), 5, 8);
         $str = substr(md5($str), 8, 10);
-        return md5($key . $str . $id);
+        return substr(md5($key . $str . $id), 0, $len);
     }
 
     /**
