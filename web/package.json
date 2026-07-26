@@ -14,8 +14,8 @@
     "dependencies": {
         "@element-plus/icons-vue": "2.3.2",
         "@vueuse/core": "14.2.1",
-        "axios": "1.17.0",
-        "echarts": "6.0.0",
+        "axios": "1.18.1",
+        "echarts": "6.1.0",
         "element-plus": "2.13.7",
         "font-awesome": "4.7.0",
         "lodash-es": "4.18.1",
@@ -49,7 +49,7 @@
         "sass": "1.99.0",
         "typescript": "6.0.3",
         "typescript-eslint": "8.59.1",
-        "vite": "8.0.10",
+        "vite": "8.1.5",
         "vue-tsc": "3.2.7"
     },
     "pnpm": {
