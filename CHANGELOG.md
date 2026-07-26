@@ -2,6 +2,19 @@
 
 🔥🔥基于 Vue3.x + ThinkPHP8 + TypeScript + Vite + Pinia + Element Plus 等流行技术栈的后台管理系统，支持常驻内存运行、可视化CRUD代码生成、自带WEB终端、自适应多端、同时提供Web、WebNuxt、Server端、内置全局数据回收站和字段级数据修改保护、自动注册路由、无限子级权限管理等，无需授权即可免费商用，希望能帮助大家实现快速开发。
 
+## v2.3.8-Release（安全更新）
+### 安全更新
+- 修复 `旧版图形验证码` 与 `逻辑验证码` 数据隔离不严导致的 `逻辑验证码` 可能被伪造的问题，建议你立即进行更新或手动修复，[本安全更新详细文档](https://doc.buildadmin.com/guide/other/incompatibleUpdate/v238.html)。
+- 更新前端 `vite、axios、echarts` 依赖以修复它们带来的安全更新。
+
+### 新增
+- 适配 `i18n Ally`（VSCode 多语言辅助插件，支持代码内实时翻译预览）
+
+### 重构/优化/修复
+- 修复语言包按需加载可能比路由慢的问题
+- 修复 `dev` 脚本使用了 `&&` 符号导致的跨平台兼容性问题
+- 首屏 loading 不再需要过度延迟隐藏
+
 ## v2.3.7-Release
 ### 新增
 - 增加菜单搜索功能
@@ -126,7 +139,7 @@
 - 优化右击菜单组件和图标选择器的事件监听
 - 优化生成 `tableRenderer.d.ts` 文件的逻辑和其内容
 
-## v2.3.1-Release
+## v2.3.1-Release（安全更新）
 
 ### 安全更新
 - 升级 `axios` 以避免 `CVE-2025-27152` 带来的影响（[axios请求可能通过绝对URL遭受SSRF和凭证泄露漏洞](https://www.cve.org/CVERecord?id=CVE-2025-27152)）
